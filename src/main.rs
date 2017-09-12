@@ -27,6 +27,18 @@ struct Star {
     spec_type: SpecType
 }
 
+impl Star {
+    fn equatorial_position_as_radians(&self) -> (f32, f32) {
+        (f32::consts::PI * 2.0 * ((self.ra_hours as f32 / 24.0f32) +
+                                  (self.ra_mins as f32 / (60.0*24.0)) +
+                                  (self.ra_seconds / (3600.0*24.0))),
+         f32::consts::PI * 0.5 * ((self.dec_deg as f32 / 90.0) +
+                                  (self.dec_mins as f32 / (90.0*60.0)) +
+                                  (self.dec_seconds as f32 / (90.0*3600.0)))
+        )
+    }
+}
+
 fn load_catalogue() -> Vec<Star> {
     let mut f = File::open("bsc5.dat").expect("bsc5.dat (yale bright star catalogue) not found");
 
@@ -122,18 +134,13 @@ unsafe fn draw_stars(stars: &Vec<Star>) {
     
     for s in stars {
         let r: f32 = 10.0;
-        let ra: f32 = f32::consts::PI * 2.0 * ((s.ra_hours as f32 / 24.0f32) +
-                                               (s.ra_mins as f32 / (60.0*24.0)) +
-                                               (s.ra_seconds / (3600.0*24.0)));
-        let dec: f32 = f32::consts::PI * 0.5 * ((s.dec_deg as f32 / 90.0) +
-                                           (s.dec_mins as f32 / (90.0*60.0)) +
-                                           (s.dec_seconds as f32 / (90.0*3600.0)));
+        let (ra, dec) = s.equatorial_position_as_radians();
         let brightness = ((6.0 - s.visual_mag)/7.0).min(1.0).max(0.0);
         let col: [f32; 3] = [brightness, brightness, brightness];
         gl1x::Color3fv(&col);
-        gl1x::Vertex3f(r * ra.sin() * dec.cos(),
+        gl1x::Vertex3f(-r * ra.sin() * dec.cos(),
                        r * dec.sin(),
-                       r * ra.cos() * dec.cos());
+                       -r * ra.cos() * dec.cos());
 
     }
 
