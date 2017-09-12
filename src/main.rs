@@ -5,7 +5,8 @@ use std::io::prelude::*;
 use std::fs::File;
 use std::ffi::CString;
 
-mod gl1x;
+// missing from gl library
+const GL_POINTS: u32 = 0x0000;
 
 #[derive(Debug)]
 enum SpecType { O, B, A, F, G, K, M }
@@ -124,7 +125,6 @@ mod glazy {
 fn main() {
     let context = osvr::Context::new("Rust OSVR example");
     let mut render = osvr::RenderManager::new(&context).unwrap();
-    gl1x::init();
     unsafe {
         gl::Disable(gl::DEPTH_TEST);
         gl::Enable(gl::BLEND);
@@ -239,7 +239,7 @@ fn main() {
                 gl::UseProgram(shader_program);
                 gl::UniformMatrix4fv(proj_matrix, 1, 0, &_projection[0]);
                 gl::UniformMatrix4fv(view_matrix, 1, 0, &_modelview[0]);
-                gl::DrawArrays(gl1x::POINTS, 0, catalogue.len() as i32);
+                gl::DrawArrays(GL_POINTS, 0, catalogue.len() as i32);
             }
         });
     }
